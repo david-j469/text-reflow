@@ -1,0 +1,13 @@
+[project]
+name = "reflow"
+version = "0.1.0"
+description = "Normalize messy hard-wrapped text and rewrap it to a fixed width"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+[project.scripts]
+reflow = "reflow.cli:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
