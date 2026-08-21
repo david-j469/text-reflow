@@ -69,5 +69,50 @@ class WrapTextTests(unittest.TestCase):
         self.assertIn("well-established-but-long", result)
 
 
+class ListHandlingTests(unittest.TestCase):
+    def test_normalize_keeps_bullet_items_separate(self):
+        text = "- first item\nstill first item\n- second item"
+        self.assertEqual(
+            normalize_paragraphs(text),
+            [[("- ", "first item still first item"), ("- ", "second item")]],
+        )
+
+    def test_normalize_keeps_numbered_items_separate(self):
+        text = "1. first\n2. second\n3) third"
+        self.assertEqual(
+            normalize_paragraphs(text),
+            [[("1. ", "first"), ("2. ", "second"), ("3) ", "third")]],
+        )
+
+    def test_normalize_splits_intro_prose_from_list(self):
+        text = "Shopping list:\n- apples\n- bananas"
+        self.assertEqual(
+            normalize_paragraphs(text),
+            ["Shopping list:", [("- ", "apples"), ("- ", "bananas")]],
+        )
+
+    def test_normalize_does_not_treat_decimal_as_list_marker(self):
+        text = "3.14 is pi\nnot a list item."
+        self.assertEqual(normalize_paragraphs(text), ["3.14 is pi not a list item."])
+
+    def test_wrap_keeps_bullets_on_separate_lines(self):
+        text = "- one\n- two\n- three"
+        result = wrap_text(text, width=72)
+        self.assertEqual(result, "- one\n- two\n- three")
+
+    def test_wrap_uses_hanging_indent_for_long_items(self):
+        text = "- " + "word " * 10
+        result = wrap_text(text, width=20)
+        lines = result.splitlines()
+        self.assertTrue(lines[0].startswith("- "))
+        for line in lines[1:]:
+            self.assertTrue(line.startswith("  "))
+
+    def test_wrap_separates_list_from_surrounding_paragraphs(self):
+        text = "Intro.\n\n- one\n- two\n\nOutro."
+        result = wrap_text(text, width=72)
+        self.assertEqual(result, "Intro.\n\n- one\n- two\n\nOutro.")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -74,6 +74,8 @@ $ reflow notes.txt
 
 ## Status
 
-Early. Paragraph detection is "blank line separates paragraphs" and nothing
-smarter yet - it doesn't know about bullet lists, indented code blocks, or
-Markdown headers. See the issues for what's planned.
+Early. Paragraphs are split on blank lines; bullet and numbered list items
+are detected and kept on their own line with a hanging indent instead of
+being merged into the paragraph around them. Indented code blocks and
+Markdown headers aren't handled specially yet. See the issues for what's
+planned.
