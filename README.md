@@ -76,6 +76,7 @@ $ reflow notes.txt
 
 Early. Paragraphs are split on blank lines; bullet and numbered list items
 are detected and kept on their own line with a hanging indent instead of
-being merged into the paragraph around them. Indented code blocks and
+being merged into the paragraph around them. Lines indented with a tab or
+4+ spaces are treated as a code block and passed through unwrapped.
 Markdown headers aren't handled specially yet. See the issues for what's
 planned.

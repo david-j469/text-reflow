@@ -114,5 +114,38 @@ class ListHandlingTests(unittest.TestCase):
         self.assertEqual(result, "Intro.\n\n- one\n- two\n\nOutro.")
 
 
+class CodeBlockHandlingTests(unittest.TestCase):
+    def test_normalize_keeps_indented_lines_as_code_block(self):
+        text = "    def f():\n        return 1"
+        self.assertEqual(
+            normalize_paragraphs(text),
+            [("code", ["    def f():", "        return 1"])],
+        )
+
+    def test_normalize_treats_tab_indent_as_code_too(self):
+        text = "\tdef f():\n\t\treturn 1"
+        self.assertEqual(
+            normalize_paragraphs(text),
+            [("code", ["\tdef f():", "\t\treturn 1"])],
+        )
+
+    def test_normalize_splits_prose_from_following_code_block(self):
+        text = "Example:\n    a = 1\n    b = 2"
+        self.assertEqual(
+            normalize_paragraphs(text),
+            ["Example:", ("code", ["    a = 1", "    b = 2"])],
+        )
+
+    def test_wrap_leaves_code_block_unwrapped_past_width(self):
+        text = "    " + "x" * 50
+        result = wrap_text(text, width=20)
+        self.assertEqual(result, "    " + "x" * 50)
+
+    def test_wrap_separates_code_block_from_surrounding_paragraphs(self):
+        text = "Intro.\n\n    code here\n\nOutro."
+        result = wrap_text(text, width=72)
+        self.assertEqual(result, "Intro.\n\n    code here\n\nOutro.")
+
+
 if __name__ == "__main__":
     unittest.main()
