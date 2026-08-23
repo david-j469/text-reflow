@@ -35,7 +35,24 @@ def main(argv=None):
         default=72,
         help="target line width (default: 72)",
     )
+    parser.add_argument(
+        "-i", "--in-place",
+        action="store_true",
+        help="rewrite each input file with the wrapped text instead of printing to stdout",
+    )
     args = parser.parse_args(argv)
+
+    if args.in_place:
+        if not args.files or "-" in args.files:
+            parser.error("--in-place requires one or more real files, not stdin")
+        for path in args.files:
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read()
+            wrapped = wrap_text(text, width=args.width)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(wrapped)
+                f.write("\n")
+        return 0
 
     text = read_input(args.files)
     sys.stdout.write(wrap_text(text, width=args.width))

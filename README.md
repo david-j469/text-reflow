@@ -30,6 +30,16 @@ wrapping:
 $ reflow chapter1.txt chapter2.txt
 ```
 
+To rewrite files in place instead of printing to stdout, add `-i` (or
+`--in-place`). Each file is wrapped and overwritten separately, so this
+one doesn't do the multi-file concatenation above:
+
+```
+$ reflow -i --width 80 notes.txt
+```
+
+`-i` requires at least one real file; it doesn't make sense with stdin.
+
 Example. Given this input, where the paragraph was hard-wrapped at some
 arbitrary width and then edited so the lines no longer line up:
 
