@@ -40,6 +40,17 @@ $ reflow -i --width 80 notes.txt
 
 `-i` requires at least one real file; it doesn't make sense with stdin.
 
+If you don't want to pass `-w` every time, drop a `.reflowrc` in the
+current directory with a `width` line:
+
+```
+width = 80
+```
+
+`#` starts a comment, blank lines are ignored, and `width` is the only
+setting read right now. An explicit `-w` on the command line always wins
+over the file.
+
 Example. Given this input, where the paragraph was hard-wrapped at some
 arbitrary width and then edited so the lines no longer line up:
 

@@ -1,8 +1,12 @@
 """Command-line entry point."""
 import argparse
+import os
 import sys
 
 from .core import wrap_text
+
+DEFAULT_WIDTH = 72
+CONFIG_FILENAME = ".reflowrc"
 
 
 def read_input(paths):
@@ -19,6 +23,31 @@ def read_input(paths):
     return "\n\n".join(chunks)
 
 
+def load_config_width(directory=None):
+    """Look for a width setting in .reflowrc in `directory` (default: cwd).
+
+    The file holds simple "key = value" lines; only "width" is recognized.
+    Blank lines and "#" comments are ignored. Returns None if the file is
+    missing or has no usable width line, so the caller can fall back to a
+    default.
+    """
+    path = os.path.join(directory or os.getcwd(), CONFIG_FILENAME)
+    if not os.path.isfile(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.split("#", 1)[0].strip()
+            if not line or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            if key.strip() == "width":
+                try:
+                    return int(value.strip())
+                except ValueError:
+                    return None
+    return None
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="reflow",
@@ -32,8 +61,8 @@ def main(argv=None):
     parser.add_argument(
         "-w", "--width",
         type=int,
-        default=72,
-        help="target line width (default: 72)",
+        default=None,
+        help="target line width (default: 72, or the width set in .reflowrc)",
     )
     parser.add_argument(
         "-i", "--in-place",
@@ -41,6 +70,11 @@ def main(argv=None):
         help="rewrite each input file with the wrapped text instead of printing to stdout",
     )
     args = parser.parse_args(argv)
+
+    if args.width is None:
+        args.width = load_config_width()
+    if args.width is None:
+        args.width = DEFAULT_WIDTH
 
     if args.in_place:
         if not args.files or "-" in args.files:
