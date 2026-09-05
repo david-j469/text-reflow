@@ -79,16 +79,25 @@ def main(argv=None):
     if args.in_place:
         if not args.files or "-" in args.files:
             parser.error("--in-place requires one or more real files, not stdin")
+        exit_code = 0
         for path in args.files:
-            with open(path, "r", encoding="utf-8") as f:
-                text = f.read()
-            wrapped = wrap_text(text, width=args.width)
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(wrapped)
-                f.write("\n")
-        return 0
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    text = f.read()
+                wrapped = wrap_text(text, width=args.width)
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(wrapped)
+                    f.write("\n")
+            except OSError as exc:
+                print(f"reflow: {exc.filename}: {exc.strerror}", file=sys.stderr)
+                exit_code = 1
+        return exit_code
 
-    text = read_input(args.files)
+    try:
+        text = read_input(args.files)
+    except OSError as exc:
+        print(f"reflow: {exc.filename}: {exc.strerror}", file=sys.stderr)
+        return 1
     sys.stdout.write(wrap_text(text, width=args.width))
     sys.stdout.write("\n")
     return 0

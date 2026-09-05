@@ -46,6 +46,26 @@ class InPlaceTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             main(["-i"])
 
+    def test_missing_file_reports_error_and_continues(self):
+        missing = self.path + ".does-not-exist"
+        self._write("word " * 20)
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            status = main(["-i", missing, self.path])
+        self.assertEqual(status, 1)
+        self.assertIn(missing, err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
+        self.assertNotEqual(self._read(), "word " * 20)
+
+
+class MissingFileTests(unittest.TestCase):
+    def test_missing_file_reports_clean_error(self):
+        missing = os.path.join(tempfile.gettempdir(), "reflow-does-not-exist.txt")
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            status = main([missing])
+        self.assertEqual(status, 1)
+        self.assertIn(missing, err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
+
 
 class ConfigWidthTests(unittest.TestCase):
     def setUp(self):
