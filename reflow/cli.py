@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 
+from . import __version__
 from .core import wrap_text
 
 DEFAULT_WIDTH = 72
@@ -52,6 +53,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="reflow",
         description="Normalize messy hard-wrapped text and rewrap it to a fixed width.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "files",

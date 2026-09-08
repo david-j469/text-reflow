@@ -40,6 +40,8 @@ $ reflow -i --width 80 notes.txt
 
 `-i` requires at least one real file; it doesn't make sense with stdin.
 
+`reflow --version` prints the installed version and exits.
+
 If you don't want to pass `-w` every time, drop a `.reflowrc` in the
 current directory with a `width` line:
 

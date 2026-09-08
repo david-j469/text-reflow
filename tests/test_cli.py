@@ -4,7 +4,17 @@ import os
 import tempfile
 import unittest
 
+from reflow import __version__
 from reflow.cli import load_config_width, main
+
+
+class VersionTests(unittest.TestCase):
+    def test_version_flag_prints_version_and_exits(self):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            with self.assertRaises(SystemExit) as cm:
+                main(["--version"])
+        self.assertEqual(cm.exception.code, 0)
+        self.assertIn(__version__, out.getvalue())
 
 
 class InPlaceTests(unittest.TestCase):
