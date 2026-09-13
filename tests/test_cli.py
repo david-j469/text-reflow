@@ -77,6 +77,31 @@ class MissingFileTests(unittest.TestCase):
         self.assertNotIn("Traceback", err.getvalue())
 
 
+class BadEncodingTests(unittest.TestCase):
+    def setUp(self):
+        fd, self.path = tempfile.mkstemp()
+        # Not valid UTF-8: a lone continuation byte.
+        os.write(fd, b"word " * 20 + b"\xff")
+        os.close(fd)
+
+    def tearDown(self):
+        os.remove(self.path)
+
+    def test_non_utf8_file_reports_clean_error(self):
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            status = main([self.path])
+        self.assertEqual(status, 1)
+        self.assertIn(self.path, err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
+
+    def test_non_utf8_file_reports_clean_error_in_place(self):
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            status = main(["-i", self.path])
+        self.assertEqual(status, 1)
+        self.assertIn(self.path, err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
+
+
 class ConfigWidthTests(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()

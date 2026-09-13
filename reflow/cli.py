@@ -10,6 +10,23 @@ DEFAULT_WIDTH = 72
 CONFIG_FILENAME = ".reflowrc"
 
 
+class InputError(Exception):
+    """A file exists but can't be read as text, e.g. it isn't valid UTF-8."""
+
+    def __init__(self, path, reason):
+        super().__init__(f"{path}: {reason}")
+        self.path = path
+        self.reason = reason
+
+
+def _read_file(path):
+    with open(path, "r", encoding="utf-8") as f:
+        try:
+            return f.read()
+        except UnicodeDecodeError:
+            raise InputError(path, "not valid UTF-8") from None
+
+
 def read_input(paths):
     """Read and concatenate input from files, or from stdin if no files are given."""
     if not paths or paths == ["-"]:
@@ -19,8 +36,7 @@ def read_input(paths):
         if path == "-":
             chunks.append(sys.stdin.read())
         else:
-            with open(path, "r", encoding="utf-8") as f:
-                chunks.append(f.read())
+            chunks.append(_read_file(path))
     return "\n\n".join(chunks)
 
 
@@ -88,8 +104,7 @@ def main(argv=None):
         exit_code = 0
         for path in args.files:
             try:
-                with open(path, "r", encoding="utf-8") as f:
-                    text = f.read()
+                text = _read_file(path)
                 wrapped = wrap_text(text, width=args.width)
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(wrapped)
@@ -97,12 +112,18 @@ def main(argv=None):
             except OSError as exc:
                 print(f"reflow: {exc.filename}: {exc.strerror}", file=sys.stderr)
                 exit_code = 1
+            except InputError as exc:
+                print(f"reflow: {exc.path}: {exc.reason}", file=sys.stderr)
+                exit_code = 1
         return exit_code
 
     try:
         text = read_input(args.files)
     except OSError as exc:
         print(f"reflow: {exc.filename}: {exc.strerror}", file=sys.stderr)
+        return 1
+    except InputError as exc:
+        print(f"reflow: {exc.path}: {exc.reason}", file=sys.stderr)
         return 1
     sys.stdout.write(wrap_text(text, width=args.width))
     sys.stdout.write("\n")
